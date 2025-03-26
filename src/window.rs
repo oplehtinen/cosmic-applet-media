@@ -1,12 +1,16 @@
 use crate::config;
 use crate::mpris_subscription;
+use cosmic::applet::padded_control;
 use cosmic::iced::platform_specific::shell::wayland::commands::popup::{destroy_popup, get_popup};
 use cosmic::iced::widget::column;
+use cosmic::iced::Alignment;
 use cosmic::iced::Length;
 use cosmic::iced::Subscription;
 use cosmic::theme;
 use cosmic::widget::container;
+use cosmic::widget::divider;
 use cosmic::widget::icon;
+use cosmic::widget::rectangle_tracker::rectangle_tracker_subscription;
 use cosmic::widget::text;
 use cosmic::widget::Id;
 use cosmic::{
@@ -95,15 +99,27 @@ impl cosmic::Application for Window {
                 } else {
                     let new_id = window::Id::unique();
                     self.popup.replace(new_id);
-
-                    let popup_settings = self.core.applet.get_popup_settings(
+                    let Rectangle {
+                        x,
+                        y,
+                        width,
+                        height,
+                    } = self.rectangle;
+                    let mut popup_settings = self.core.applet.get_popup_settings(
                         self.core.main_window_id().unwrap(),
                         new_id,
                         None,
                         None,
                         None,
                     );
+                    popup_settings.positioner.anchor_rect = Rectangle::<i32> {
+                        x: x.max(1.) as i32,
+                        y: y.max(1.) as i32,
+                        width: width.max(1.) as i32,
+                        height: height.max(1.) as i32,
+                    };
 
+                    popup_settings.positioner.size = Some((300, 500));
                     return get_popup(popup_settings);
                 }
             }
@@ -161,6 +177,7 @@ impl cosmic::Application for Window {
     }
     fn subscription(&self) -> Subscription<Message> {
         Subscription::batch(vec![
+            rectangle_tracker_subscription(0).map(|e| Message::Rectangle(e.1)),
             self.core
                 .watch_config::<config::Config>(Self::APP_ID)
                 .map(|u| {
@@ -307,7 +324,15 @@ impl cosmic::Application for Window {
             }
         }
 
-        let content = Element::from(row![self.core.applet.text(""), control_elements]);
+        let content = Element::from(
+            column![
+                padded_control(control_elements),
+                padded_control(divider::horizontal::default()).padding([space_xxs, space_s]),
+            ]
+            .align_x(Alignment::Center)
+            .padding([8, 0]),
+        );
+
         self.core.applet.popup_container(container(content)).into()
     }
 }
