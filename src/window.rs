@@ -176,11 +176,14 @@ impl cosmic::Application for Window {
                 fl!("unknown-artist")
             };
             let button = button::custom(if horizontal {
-                Element::from(row![
-                    text::body(title).width(Length::Shrink),
-                    text::body("–").width(Length::Shrink),
-                    text::body(artists).width(Length::Shrink),
-                ])
+                Element::from(
+                    row![
+                        text::body(title).width(Length::Shrink),
+                        text::body("–").width(Length::Shrink),
+                        text::body(artists).width(Length::Shrink),
+                    ]
+                    .spacing(8),
+                )
             } else {
                 Element::from(column![
                     text::body(title).width(Length::Shrink),
