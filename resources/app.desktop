@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Cosmic Applet Media
+Comment=MPRIs media applet for Cosmic
+Type=Application
+Icon=com.github.oplehtinen.CosmicMediaApplet
+Exec=cosmic-applet-media %F
+Terminal=false
+StartupNotify=true
+Categories=COSMIC
+Keywords=COSMIC
+MimeType=
