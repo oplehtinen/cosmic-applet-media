@@ -1,12 +1,16 @@
 use crate::config;
 use crate::mpris_subscription;
+use cosmic::iced::platform_specific::shell::wayland::commands::popup::{destroy_popup, get_popup};
 use cosmic::iced::widget::column;
 use cosmic::iced::Length;
 use cosmic::iced::Subscription;
+use cosmic::theme;
+use cosmic::widget::container;
 use cosmic::widget::text;
 use cosmic::widget::Id;
 use cosmic::{
     applet::cosmic_panel_config::PanelAnchor,
+    cosmic_theme::Spacing,
     iced::Rectangle,
     iced_core::window,
     iced_widget::row,
@@ -79,6 +83,24 @@ impl cosmic::Application for Window {
             Message::Mpris(MprisUpdate::Setup) => {
                 self.player_status = None;
             }
+            Message::TogglePopup => {
+                if let Some(p) = self.popup.take() {
+                    return destroy_popup(p);
+                } else {
+                    let new_id = window::Id::unique();
+                    self.popup.replace(new_id);
+
+                    let popup_settings = self.core.applet.get_popup_settings(
+                        self.core.main_window_id().unwrap(),
+                        new_id,
+                        None,
+                        None,
+                        None,
+                    );
+
+                    return get_popup(popup_settings);
+                }
+            }
             Message::MprisRequest(r) => {
                 let Some(player_status) = self.player_status.as_ref() else {
                     tracing::error!("No player found");
@@ -114,7 +136,6 @@ impl cosmic::Application for Window {
                 };
             }
             Message::ConfigChanged => (),
-            Message::TogglePopup => (),
             Message::CloseRequested(id) => {
                 if Some(id) == self.popup {
                     self.popup = None;
@@ -229,5 +250,12 @@ impl cosmic::Application for Window {
             )
             .into()
         }
+    }
+    fn view_window(&self, id: cosmic::iced::window::Id) -> cosmic::Element<Self::Message> {
+        let Spacing {
+            space_xxs, space_s, ..
+        } = theme::active().cosmic().spacing;
+        let content = Element::from(row![self.core.applet.text("")]);
+        self.core.applet.popup_container(container(content)).into()
     }
 }
