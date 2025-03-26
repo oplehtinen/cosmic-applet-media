@@ -9,3 +9,7 @@ StartupNotify=true
 Categories=COSMIC
 Keywords=COSMIC
 MimeType=
+StartupNotify=true
+NoDisplay=true
+X-CosmicApplet=true
+X-CosmicHoverPopup=Auto
