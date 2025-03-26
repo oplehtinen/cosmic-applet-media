@@ -1,6 +1,6 @@
 # Cosmic Applet Media
 
-MPRIs media applet for Cosmic
+MPRIS media applet for Cosmic. MPRIS subscription and some other stuff from [Cosmic's applets](https://github.com/pop-os/cosmic-applets/tree/master).
 
 ## Installation
 

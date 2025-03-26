@@ -1,7 +1,8 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0-only
 
 mod config;
 mod i18n;
+mod mpris_subscription;
 mod window;
 
 fn main() -> cosmic::iced::Result {

@@ -2,7 +2,7 @@
 name = "cosmic-applet-media"
 version = "0.1.0"
 edition = "2021"
-license = "MIT"
+license = "GPL-3.0"
 description = "MPRIs media applet for Cosmic"
 repository = "https://github.com/oplehtinen/cosmic-applet-media"
 
@@ -16,7 +16,11 @@ once_cell = "1.21.1"
 open = "5.3.0"
 rust-embed = "8.5.0"
 tokio = { version = "1.41.0", features = ["full"] }
-
+zbus = { version = "4", default-features = false, features = ["tokio"] }
+mpris2-zbus = { git = "https://github.com/pop-os/dbus-settings-bindings" }
+urlencoding = "2.1.3"
+url = "2.5.4"
+tracing = "0.1.41"
 [dependencies.i18n-embed]
 version = "0.15"
 features = ["fluent-system", "desktop-requester"]
