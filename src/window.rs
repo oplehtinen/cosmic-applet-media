@@ -6,6 +6,7 @@ use cosmic::iced::Length;
 use cosmic::iced::Subscription;
 use cosmic::theme;
 use cosmic::widget::container;
+use cosmic::widget::icon;
 use cosmic::widget::text;
 use cosmic::widget::Id;
 use cosmic::{
@@ -17,9 +18,14 @@ use cosmic::{
     widget::{autosize, button, rectangle_tracker::RectangleUpdate, RectangleTracker},
     Element, Task,
 };
+use mpris2_zbus::player::PlaybackStatus;
 use mpris_subscription::{MprisRequest, MprisUpdate};
 use once_cell::sync::Lazy;
 static AUTOSIZE_MAIN_ID: Lazy<Id> = Lazy::new(|| Id::new("autosize-main"));
+const GO_BACK: &str = "media-skip-backward-symbolic";
+const GO_NEXT: &str = "media-skip-forward-symbolic";
+const PAUSE: &str = "media-playback-pause-symbolic";
+const PLAY: &str = "media-playback-start-symbolic";
 pub struct Window {
     core: cosmic::app::Core,
     popup: Option<window::Id>,
@@ -255,7 +261,53 @@ impl cosmic::Application for Window {
         let Spacing {
             space_xxs, space_s, ..
         } = theme::active().cosmic().spacing;
-        let content = Element::from(row![self.core.applet.text("")]);
+        fn control_element(control_type: MprisRequest) -> Option<Element<'static, Message>> {
+            let control_icon = match control_type {
+                MprisRequest::Next => Some(GO_NEXT),
+                MprisRequest::Play => Some(PLAY),
+                MprisRequest::Previous => Some(GO_BACK),
+                MprisRequest::Pause => Some(PAUSE),
+            };
+            if let Some(icon_name) = control_icon {
+                Some(
+                    button::icon(icon::from_name(icon_name).size(16).symbolic(true))
+                        .extra_small()
+                        .class(cosmic::theme::Button::AppletIcon)
+                        .on_press(Message::MprisRequest(control_type))
+                        .into(),
+                )
+            } else {
+                Some(text::body("").into())
+            }
+        }
+        let mut control_elements = row![].width(Length::Shrink).spacing(space_s);
+        if let Some(player) = &self.player_status {
+            if player.can_go_previous {
+                let prev_icon = control_element(MprisRequest::Previous);
+                if let Some(prev_icon) = prev_icon {
+                    control_elements = control_elements.push(prev_icon);
+                }
+            }
+            if player.can_pause && player.status == PlaybackStatus::Playing {
+                let pause_icon = control_element(MprisRequest::Pause);
+                if let Some(pause_icon) = pause_icon {
+                    control_elements = control_elements.push(pause_icon);
+                }
+            } else if player.can_play {
+                let play_icon = control_element(MprisRequest::Play);
+                if let Some(play_icon) = play_icon {
+                    control_elements = control_elements.push(play_icon);
+                }
+            }
+            if player.can_go_next {
+                let next_icon = control_element(MprisRequest::Next);
+                if let Some(next_icon) = next_icon {
+                    control_elements = control_elements.push(next_icon);
+                }
+            }
+        }
+
+        let content = Element::from(row![self.core.applet.text(""), control_elements]);
         self.core.applet.popup_container(container(content)).into()
     }
 }
