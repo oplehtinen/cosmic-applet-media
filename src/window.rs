@@ -13,6 +13,7 @@ use cosmic::widget::icon;
 use cosmic::widget::rectangle_tracker::rectangle_tracker_subscription;
 use cosmic::widget::text;
 use cosmic::widget::Id;
+use cosmic::widget::Space;
 use cosmic::{
     applet::cosmic_panel_config::PanelAnchor,
     cosmic_theme::Spacing,
@@ -251,27 +252,9 @@ impl cosmic::Application for Window {
             )
             .into()
         } else {
-            let button = button::custom(if horizontal {
-                Element::from(row!(self.core.applet.text("test")))
-            } else {
-                Element::from(row!(self.core.applet.text("Vertical widget")))
-            })
-            .padding(if horizontal {
-                [0, self.core.applet.suggested_padding(true)]
-            } else {
-                [self.core.applet.suggested_padding(true), 0]
-            })
-            .on_press_down(Message::TogglePopup)
-            .class(cosmic::theme::Button::AppletIcon);
-            autosize::autosize(
-                if let Some(tracker) = self.rectangle_tracker.as_ref() {
-                    Element::from(tracker.container(0, button).ignore_bounds(true))
-                } else {
-                    button.into()
-                },
-                AUTOSIZE_MAIN_ID.clone(),
-            )
-            .into()
+            let button = button::custom(Element::from(Space::new(0, 0)))
+                .class(cosmic::theme::Button::AppletIcon);
+            autosize::autosize(button, AUTOSIZE_MAIN_ID.clone()).into()
         }
     }
     fn view_window(&self, id: cosmic::iced::window::Id) -> cosmic::Element<Self::Message> {
